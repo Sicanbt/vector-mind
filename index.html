@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VECTOR MIND — Knowledge Extraction Platform</title>
+  <style>
+    :root {
+      --bg:        #0d0b1a;
+      --bg2:       #13102a;
+      --bg3:       #1a1535;
+      --purple:    #7c3aed;
+      --purple-l:  #a855f7;
+      --cyan:      #06b6d4;
+      --cyan-l:    #67e8f9;
+      --text:      #e2e8f0;
+      --text-dim:  #94a3b8;
+      --border:    rgba(124,58,237,0.25);
+      --glow-p:    rgba(124,58,237,0.4);
+      --glow-c:    rgba(6,182,212,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── animated grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,58,237,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── floating orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 420px; height: 420px; background: var(--glow-p); top: -120px; left: -100px; animation-delay: 0s; }
+    .orb-2 { width: 320px; height: 320px; background: var(--glow-c); bottom: -80px; right: -80px; animation-delay: -6s; }
+    .orb-3 { width: 200px; height: 200px; background: rgba(168,85,247,0.2); top: 40%; left: 50%; animation-delay: -3s; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 20px) scale(1.08); }
+    }
+
+    /* ── layout ── */
+    .wrapper { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .logo span { background: linear-gradient(90deg, var(--purple-l), var(--cyan-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-badge {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--cyan);
+      color: var(--cyan-l);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ── hero ── */
+    .hero {
+      text-align: center;
+      padding: 90px 0 70px;
+    }
+    .hero-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      border: 1px solid rgba(6,182,212,0.3);
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+      background: rgba(6,182,212,0.05);
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(90deg, var(--purple-l) 0%, var(--cyan-l) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-dim);
+      max-width: 620px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: 13px 30px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #fff;
+      box-shadow: 0 4px 24px var(--glow-p);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px var(--glow-c); }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--purple-l); color: var(--purple-l); }
+
+    /* ── model badge ── */
+    .model-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0 0 70px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    .model-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+    }
+    .model-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── section titles ── */
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .section-title h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .section-title p { color: var(--text-dim); font-size: 1rem; }
+
+    /* ── agents grid ── */
+    .agents { padding: 0 0 90px; }
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .agent-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .agent-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .agent-card:hover { transform: translateY(-4px); border-color: var(--purple-l); box-shadow: 0 8px 32px var(--glow-p); }
+    .agent-card:hover::before { opacity: 1; }
+    .agent-icon {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
+    }
+    .icon-crawler  { background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3); }
+    .icon-parser   { background: rgba(6,182,212,0.12);  border: 1px solid rgba(6,182,212,0.3); }
+    .icon-reasoner { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3); }
+    .icon-publisher{ background: rgba(6,182,212,0.12);  border: 1px solid rgba(6,182,212,0.3); }
+    .agent-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+    .agent-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .agent-desc { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; }
+    .agent-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 16px;
+      font-size: 0.75rem;
+      color: var(--cyan-l);
+      background: rgba(6,182,212,0.08);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+    .agent-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: pulse 2s infinite; }
+
+    /* ── stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 90px;
+    }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--purple-l), var(--cyan-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* ── pipeline ── */
+    .pipeline { margin-bottom: 90px; }
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+    .pipe-step {
+      display: flex; flex-direction: column; align-items: center;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 22px;
+      min-width: 120px;
+      text-align: center;
+      position: relative;
+    }
+    .pipe-step .step-num {
+      font-size: 0.65rem;
+      color: var(--cyan);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .pipe-step .step-name { font-size: 0.9rem; font-weight: 600; }
+    .pipe-arrow {
+      font-size: 1.2rem;
+      color: var(--purple-l);
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 30px 0;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+    footer a { color: var(--purple-l); text-decoration: none; }
+    footer a:hover { color: var(--cyan-l); }
+
+    /* ── terminal block ── */
+    .terminal {
+      background: #080614;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 90px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .terminal .t-bar {
+      display: flex; gap: 6px; margin-bottom: 16px;
+    }
+    .terminal .t-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .t-red { background: #ff5f57; } .t-yellow { background: #febc2e; } .t-green { background: #28c840; }
+    .t-prompt { color: var(--purple-l); }
+    .t-cmd    { color: var(--text); }
+    .t-out    { color: var(--cyan-l); }
+    .t-comment{ color: #4a5568; }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrapper">
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <span>Vector Mind</span>
+    </div>
+    <div class="nav-badge">MiMo V2.5 Powered</div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag">⚡ Autonomous Knowledge Extraction</div>
+    <h1>
+      Extract. Reason.<br/>
+      <span class="grad">Publish Intelligence.</span>
+    </h1>
+    <p>
+      VECTOR MIND is a multi-agent knowledge extraction platform powered by
+      <strong>MiMo V2.5</strong> — turning raw web data into structured,
+      actionable intelligence through a coordinated pipeline of specialized AI agents.
+    </p>
+    <div class="hero-actions">
+      <a href="#agents" class="btn btn-primary">Explore Agents</a>
+      <a href="#pipeline" class="btn btn-outline">View Pipeline</a>
+    </div>
+  </section>
+
+  <!-- MODEL BADGE -->
+  <div class="model-strip">
+    <div class="model-pill">
+      <span class="dot"></span>
+      MiMo V2.5 — Active
+    </div>
+    <span>·</span>
+    <span>4 Agents Online</span>
+    <span>·</span>
+    <span>Real-time Extraction</span>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value">4</div>
+      <div class="stat-label">Active Agents</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">MiMo</div>
+      <div class="stat-label">V2.5 Engine</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">∞</div>
+      <div class="stat-label">Knowledge Nodes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">99.9%</div>
+      <div class="stat-label">Uptime SLA</div>
+    </div>
+  </div>
+
+  <!-- AGENTS -->
+  <section class="agents" id="agents">
+    <div class="section-title">
+      <h2>Agent <span style="background:linear-gradient(90deg,var(--purple-l),var(--cyan-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Pipeline</span></h2>
+      <p>Four specialized agents working in concert to extract and deliver knowledge</p>
+    </div>
+    <div class="agents-grid">
+
+      <div class="agent-card">
+        <div class="agent-icon icon-crawler">🕷️</div>
+        <div class="agent-label">Agent 01</div>
+        <div class="agent-name">Crawler</div>
+        <div class="agent-desc">
+          Autonomously traverses the web, following semantic links and sitemap structures
+          to discover and queue relevant content sources for extraction.
+        </div>
+        <div class="agent-status"><span class="dot"></span> Online</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="agent-icon icon-parser">⚙️</div>
+        <div class="agent-label">Agent 02</div>
+        <div class="agent-name">Parser</div>
+        <div class="agent-desc">
+          Deconstructs raw HTML, PDFs, and structured data into clean semantic units —
+          stripping noise and preserving meaningful content relationships.
+        </div>
+        <div class="agent-status"><span class="dot"></span> Online</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="agent-icon icon-reasoner">🧠</div>
+        <div class="agent-label">Agent 03</div>
+        <div class="agent-name">Reasoner</div>
+        <div class="agent-desc">
+          Powered by <strong>MiMo V2.5</strong>, this agent applies multi-step reasoning
+          to synthesize facts, resolve contradictions, and build knowledge graphs.
+        </div>
+        <div class="agent-status"><span class="dot"></span> Online</div>
+      </div>
+
+      <div class="agent-card">
+        <div class="agent-icon icon-publisher">📡</div>
+        <div class="agent-label">Agent 04</div>
+        <div class="agent-name">Publisher</div>
+        <div class="agent-desc">
+          Formats and delivers structured intelligence to downstream consumers via
+          REST APIs, webhooks, vector stores, or real-time streaming endpoints.
+        </div>
+        <div class="agent-status"><span class="dot"></span> Online</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PIPELINE -->
+  <section class="pipeline" id="pipeline">
+    <div class="section-title">
+      <h2>Extraction <span style="background:linear-gradient(90deg,var(--purple-l),var(--cyan-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Flow</span></h2>
+      <p>End-to-end pipeline from raw web to structured knowledge</p>
+    </div>
+    <div class="pipeline-flow">
+      <div class="pipe-step">
+        <div class="step-num">Step 1</div>
+        <div class="step-name">🕷️ Crawl</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="step-num">Step 2</div>
+        <div class="step-name">⚙️ Parse</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="step-num">Step 3</div>
+        <div class="step-name">🧠 Reason</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="step-num">Step 4</div>
+        <div class="step-name">📡 Publish</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TERMINAL -->
+  <div class="terminal">
+    <div class="t-bar">
+      <div class="t-dot t-red"></div>
+      <div class="t-dot t-yellow"></div>
+      <div class="t-dot t-green"></div>
+    </div>
+    <div><span class="t-comment"># Initialize VECTOR MIND extraction pipeline</span></div>
+    <div><span class="t-prompt">$ </span><span class="t-cmd">vector-mind init --engine mimo-v2.5 --agents all</span></div>
+    <div><span class="t-out">✓ MiMo V2.5 engine loaded</span></div>
+    <div><span class="t-out">✓ Crawler agent   [READY]</span></div>
+    <div><span class="t-out">✓ Parser agent    [READY]</span></div>
+    <div><span class="t-out">✓ Reasoner agent  [READY]</span></div>
+    <div><span class="t-out">✓ Publisher agent [READY]</span></div>
+    <div><span class="t-prompt">$ </span><span class="t-cmd">vector-mind run --target "https://example.com" --depth 3</span></div>
+    <div><span class="t-out">⚡ Pipeline started — 4 agents active</span></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>VECTOR MIND &copy; 2026 &mdash; Knowledge Extraction Platform &mdash; Powered by <a href="#">MiMo V2.5</a></p>
+  </footer>
+
+</div>
+
+<script>
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+
+  // Animate stat values on scroll
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.style.opacity = '1';
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.stat-card, .agent-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
